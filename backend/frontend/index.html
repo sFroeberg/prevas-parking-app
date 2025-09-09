@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prevas Parking Slot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#176470">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Parking">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Prevas parking slot</h1>
+            <p>Click on the parking spot to toggle its status</p>
+        </header>
+        
+        <div class="controls">
+            <button id="resetAll" hidden>Reset Spot</button>
+        </div>
+
+        <div id="parkingGrid" class="parking-grid">
+            <!-- Parking spots will be dynamically added here -->
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="spot available"></div>
+                <span>Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="spot occupied"></div>
+                <span>Occupied</span>
+            </div>
+        </div>
+        
+        <div class="quick-release">
+            <button id="quickReleaseBtn" class="release-btn">Make Available</button>
+        </div>
+    </div>
+
+    <div id="spotModal" class="modal">
+        <div class="modal-content">
+            <h2>Update Parking Spot <span id="spotNumber"></span></h2>
+            <div class="form-group">
+                <label for="occupantName">Your Name:</label>
+                <input type="text" id="occupantName" placeholder="Enter your name">
+            </div>
+            <div class="form-group" id="durationGroup">
+                <label for="parkingDuration">Duration (hours):</label>
+                <select id="parkingDuration">
+                    <option value="1">1 hour</option>
+                    <option value="2">2 hours</option>
+                    <option value="4">4 hours</option>
+                    <option value="8" selected>8 hours (full day)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="spotStatus">Status:</label>
+                <select id="spotStatus">
+                    <option value="occupied">Occupied by me</option>
+                    <option value="available">Available</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button id="cancelUpdate">Cancel</button>
+                <button id="confirmUpdate">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
