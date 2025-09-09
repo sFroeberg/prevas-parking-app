@@ -19,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from frontend directory
-app.use(express.static('frontend'));
+app.use(express.static('backend/frontend'));
 
 // Serve Socket.IO client files
 app.get('/socket.io/socket.io.js', (req, res) => {
