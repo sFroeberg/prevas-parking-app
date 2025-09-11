@@ -333,9 +333,13 @@ function setupEventListeners() {
 
 // Timer utility functions
 function getTimeRemaining(endTime) {
+    // Get current time in Stockholm timezone
     const now = new Date();
+    const stockholmNow = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
+    
+    // Parse end time and ensure it's treated as Stockholm time
     const end = new Date(endTime);
-    const diff = end - now;
+    const diff = end - stockholmNow;
     
     if (diff <= 0) return 'Expired';
     
@@ -350,12 +354,16 @@ function getTimeRemaining(endTime) {
 }
 
 function getProgressPercentage(endTime, durationHours) {
+    // Get current time in Stockholm timezone
     const now = new Date();
+    const stockholmNow = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
+    
+    // Parse end time and calculate start time
     const end = new Date(endTime);
     const start = new Date(end.getTime() - (durationHours * 60 * 60 * 1000));
     
     const totalDuration = end - start;
-    const elapsed = now - start;
+    const elapsed = stockholmNow - start;
     
     return Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
 }
