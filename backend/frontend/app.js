@@ -14,6 +14,7 @@ let spots = [];
 let selectedSpot = null;
 let socket = null;
 let timerInterval = null;
+let bookingHistory = [];
 
 // API Configuration
 const API_BASE = window.location.origin;
@@ -21,6 +22,7 @@ const API_BASE = window.location.origin;
 // Initialize the app
 function init() {
     loadSpots(); // Load initial data
+    loadBookingHistory(); // Load booking history
     setupEventListeners();
     startTimerUpdates();
     
@@ -34,15 +36,34 @@ function init() {
 async function loadSpots() {
     try {
         const response = await fetch(`${API_BASE}/api/spots`);
-        spots = await response.json();
-        renderParkingSpots();
+        if (response.ok) {
+            spots = await response.json();
+            renderParkingSpots();
+        } else {
+            console.error('Failed to load parking spots');
+        }
     } catch (error) {
-        console.error('Error loading spots:', error);
+        console.error('Error loading parking spots:', error);
+    }
+}
+
+// Load booking history from API
+async function loadBookingHistory() {
+    try {
+        const response = await fetch(`${API_BASE}/api/history`);
+        if (response.ok) {
+            bookingHistory = await response.json();
+            renderBookingHistory();
+        } else {
+            console.error('Failed to load booking history');
+        }
+    } catch (error) {
+        console.error('Error loading booking history:', error);
     }
 }
 
 // Update a parking spot via API
-async function updateParkingSpot(spotId, isOccupied, occupiedBy, durationHours = null) {
+async function updateParkingSpot(spotId, isOccupied, occupiedBy, durationHours = null, startTime = null, bookingDate = null) {
     try {
         const response = await fetch(`${API_BASE}/api/spots/${spotId}`, {
             method: 'PUT',
@@ -51,9 +72,11 @@ async function updateParkingSpot(spotId, isOccupied, occupiedBy, durationHours =
             },
             body: JSON.stringify({
                 isOccupied,
-                occupiedBy: isOccupied ? (occupiedBy || 'Anonymous') : null,
-                durationHours: durationHours
-            }),
+                occupiedBy,
+                durationHours,
+                startTime,
+                bookingDate
+            })
         });
         
         if (!response.ok) {
@@ -195,10 +218,17 @@ function setupEventListeners() {
         if (occupiedSpot) {
             const success = await updateParkingSpot(occupiedSpot.id, false, '', 0);
             if (success) {
-                await loadParkingSpots();
+                await loadSpots();
+                await loadBookingHistory();
             }
         }
     });
+    
+    // Set default booking date to today
+    const bookingDateInput = document.getElementById('bookingDate');
+    const startTimeInput = document.getElementById('startTime');
+    const today = new Date().toISOString().split('T')[0];
+    bookingDateInput.value = today;
     
     // Confirm update
     confirmUpdateBtn.addEventListener('click', async () => {
@@ -207,6 +237,8 @@ function setupEventListeners() {
         const isOccupied = spotStatusSelect.value === 'occupied';
         const occupantName = isOccupied ? (occupantNameInput.value.trim() || 'Anonymous') : '';
         const durationHours = isOccupied ? parseInt(parkingDurationSelect.value) : null;
+        const bookingDate = isOccupied ? bookingDateInput.value : null;
+        const startTime = isOccupied ? `${bookingDate}T${startTimeInput.value}:00` : null;
         
         if (isOccupied && !occupantName) {
             alert('Please enter your name or use "Anonymous"');
@@ -217,7 +249,9 @@ function setupEventListeners() {
             selectedSpot.id,
             isOccupied,
             isOccupied ? occupantName : '',
-            durationHours
+            durationHours,
+            startTime,
+            bookingDate
         );
         
         if (success) {
@@ -303,6 +337,37 @@ if ('serviceWorker' in navigator) {
                 console.log('ServiceWorker registration failed: ', err);
             });
     });
+}
+
+// Render booking history
+function renderBookingHistory() {
+    const historyContainer = document.getElementById('bookingHistory');
+    
+    if (bookingHistory.length === 0) {
+        historyContainer.innerHTML = '<div class="no-history">No recent bookings</div>';
+        return;
+    }
+    
+    historyContainer.innerHTML = bookingHistory.map(entry => {
+        const startDate = new Date(entry.startTime);
+        const endDate = new Date(entry.endTime);
+        const isToday = entry.bookingDate === new Date().toISOString().split('T')[0];
+        const dateLabel = isToday ? 'Today' : startDate.toLocaleDateString();
+        
+        return `
+            <div class="history-item">
+                <div>
+                    <div class="history-user">${entry.occupiedBy}</div>
+                    <div class="history-details">
+                        ${startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                        ${endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
+                        (${entry.durationHours}h)
+                    </div>
+                </div>
+                <div class="history-date">${dateLabel}</div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Initialize the app when the DOM is fully loaded
