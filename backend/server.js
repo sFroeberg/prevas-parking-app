@@ -29,6 +29,7 @@ app.get('/socket.io/socket.io.js', (req, res) => {
 // In-memory storage for parking spots
 let parkingSpots = [];
 let bookingHistory = []; // Store last 10 bookings
+let upcomingBookings = []; // Store future bookings
 
 // Initialize with some default parking spots
 function initializeParkingSpots() {
@@ -59,6 +60,11 @@ app.get('/api/history', (req, res) => {
     res.json(bookingHistory);
 });
 
+// Get upcoming bookings
+app.get('/api/upcoming', (req, res) => {
+    res.json(upcomingBookings);
+});
+
 // Update parking spot status
 app.put('/api/spots/:id', (req, res) => {
     const { id } = req.params;
@@ -75,35 +81,65 @@ app.put('/api/spots/:id', (req, res) => {
     const endTime = isOccupied && durationHours ? 
         new Date(bookingStartTime.getTime() + (durationHours * 60 * 60 * 1000)).toISOString() : null;
     
-    // Add to booking history when booking (not releasing)
+    const today = now.toISOString().split('T')[0];
+    const selectedDate = bookingDate || today;
+    const isFutureBooking = selectedDate > today;
+    
     if (isOccupied && occupiedBy) {
-        const historyEntry = {
-            id: uuidv4(),
-            spotNumber: parkingSpots[spotIndex].number,
-            occupiedBy,
-            startTime: bookingStartTime.toISOString(),
-            endTime,
-            durationHours,
-            bookingDate: bookingDate || now.toISOString().split('T')[0],
-            timestamp: now.toISOString()
-        };
-        
-        bookingHistory.unshift(historyEntry); // Add to beginning
-        if (bookingHistory.length > 10) {
-            bookingHistory = bookingHistory.slice(0, 10); // Keep only last 10
+        if (isFutureBooking) {
+            // Add to upcoming bookings instead of occupying spot now
+            const upcomingEntry = {
+                id: uuidv4(),
+                spotNumber: parkingSpots[spotIndex].number,
+                occupiedBy,
+                startTime: bookingStartTime.toISOString(),
+                endTime,
+                durationHours,
+                bookingDate: selectedDate,
+                timestamp: now.toISOString()
+            };
+            
+            upcomingBookings.unshift(upcomingEntry);
+            if (upcomingBookings.length > 10) {
+                upcomingBookings = upcomingBookings.slice(0, 10);
+            }
+            
+            // Don't occupy the spot for future bookings
+            res.json({ message: 'Future booking created', booking: upcomingEntry });
+            return;
+        } else {
+            // Current day booking - add to history and occupy spot
+            const historyEntry = {
+                id: uuidv4(),
+                spotNumber: parkingSpots[spotIndex].number,
+                occupiedBy,
+                startTime: bookingStartTime.toISOString(),
+                endTime,
+                durationHours,
+                bookingDate: selectedDate,
+                timestamp: now.toISOString()
+            };
+            
+            bookingHistory.unshift(historyEntry);
+            if (bookingHistory.length > 10) {
+                bookingHistory = bookingHistory.slice(0, 10);
+            }
         }
     }
     
-    parkingSpots[spotIndex] = {
-        ...parkingSpots[spotIndex],
-        isOccupied,
-        occupiedBy: isOccupied ? occupiedBy : null,
-        lastUpdated: now.toISOString(),
-        endTime,
-        durationHours: isOccupied ? durationHours : null,
-        startTime: isOccupied ? bookingStartTime.toISOString() : null,
-        bookingDate: isOccupied ? (bookingDate || now.toISOString().split('T')[0]) : null
-    };
+    // Only update spot occupancy for current day bookings
+    if (!isFutureBooking || !isOccupied) {
+        parkingSpots[spotIndex] = {
+            ...parkingSpots[spotIndex],
+            isOccupied,
+            occupiedBy: isOccupied ? occupiedBy : null,
+            lastUpdated: now.toISOString(),
+            endTime,
+            durationHours: isOccupied ? durationHours : null,
+            startTime: isOccupied ? bookingStartTime.toISOString() : null,
+            bookingDate: isOccupied ? selectedDate : null
+        };
+    }
     
     // Emit real-time update to all connected clients
     io.emit('spotUpdated', parkingSpots[spotIndex]);

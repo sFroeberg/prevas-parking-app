@@ -15,6 +15,7 @@ let selectedSpot = null;
 let socket = null;
 let timerInterval = null;
 let bookingHistory = [];
+let upcomingBookings = [];
 
 // API Configuration
 const API_BASE = window.location.origin;
@@ -23,6 +24,7 @@ const API_BASE = window.location.origin;
 function init() {
     loadSpots(); // Load initial data
     loadBookingHistory(); // Load booking history
+    loadUpcomingBookings(); // Load upcoming bookings
     setupEventListeners();
     startTimerUpdates();
     
@@ -59,6 +61,21 @@ async function loadBookingHistory() {
         }
     } catch (error) {
         console.error('Error loading booking history:', error);
+    }
+}
+
+// Load upcoming bookings from API
+async function loadUpcomingBookings() {
+    try {
+        const response = await fetch(`${API_BASE}/api/upcoming`);
+        if (response.ok) {
+            upcomingBookings = await response.json();
+            renderUpcomingBookings();
+        } else {
+            console.error('Failed to load upcoming bookings');
+        }
+    } catch (error) {
+        console.error('Error loading upcoming bookings:', error);
     }
 }
 
@@ -220,6 +237,7 @@ function setupEventListeners() {
             if (success) {
                 await loadSpots();
                 await loadBookingHistory();
+                await loadUpcomingBookings();
             }
         }
     });
@@ -255,6 +273,9 @@ function setupEventListeners() {
         );
         
         if (success) {
+            await loadSpots();
+            await loadBookingHistory();
+            await loadUpcomingBookings();
             hideUpdateModal();
         }
     });
@@ -353,6 +374,47 @@ function renderBookingHistory() {
         const endDate = new Date(entry.endTime);
         const isToday = entry.bookingDate === new Date().toISOString().split('T')[0];
         const dateLabel = isToday ? 'Today' : startDate.toLocaleDateString();
+        
+        return `
+            <div class="history-item">
+                <div>
+                    <div class="history-user">${entry.occupiedBy}</div>
+                    <div class="history-details">
+                        ${startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                        ${endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
+                        (${entry.durationHours}h)
+                    </div>
+                </div>
+                <div class="history-date">${dateLabel}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Render upcoming bookings
+function renderUpcomingBookings() {
+    const upcomingContainer = document.getElementById('upcomingBookings');
+    
+    if (upcomingBookings.length === 0) {
+        upcomingContainer.innerHTML = '<div class="no-history">No upcoming bookings</div>';
+        return;
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowString = tomorrow.toISOString().split('T')[0];
+    
+    upcomingContainer.innerHTML = upcomingBookings.map(entry => {
+        const startDate = new Date(entry.startTime);
+        const endDate = new Date(entry.endTime);
+        
+        let dateLabel;
+        if (entry.bookingDate === tomorrowString) {
+            dateLabel = 'Tomorrow';
+        } else {
+            dateLabel = startDate.toLocaleDateString();
+        }
         
         return `
             <div class="history-item">

@@ -215,7 +215,7 @@ button:hover {
 }
 
 /* History Section */
-.history-section {
+.history-section, .upcoming-section {
     margin-top: 30px;
     padding: 20px;
     background-color: var(--white);
@@ -223,7 +223,11 @@ button:hover {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.history-section h3 {
+.upcoming-section {
+    border-left: 4px solid #3498db;
+}
+
+.history-section h3, .upcoming-section h3 {
     color: var(--text-color);
     margin-bottom: 15px;
     font-size: 18px;
