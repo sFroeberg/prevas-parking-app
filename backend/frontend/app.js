@@ -339,7 +339,8 @@ function getTimeRemaining(endTime) {
     
     // Parse end time and ensure it's treated as Stockholm time
     const end = new Date(endTime);
-    const diff = end - stockholmNow;
+    const stockholmEnd = new Date(end.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
+    const diff = stockholmEnd - stockholmNow;
     
     if (diff <= 0) return 'Expired';
     
