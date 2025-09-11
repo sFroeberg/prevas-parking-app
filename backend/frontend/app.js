@@ -359,11 +359,12 @@ function getProgressPercentage(endTime, durationHours) {
     const now = new Date();
     const stockholmNow = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
     
-    // Parse end time and calculate start time
+    // Parse end time and ensure it's treated as Stockholm time
     const end = new Date(endTime);
-    const start = new Date(end.getTime() - (durationHours * 60 * 60 * 1000));
+    const stockholmEnd = new Date(end.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
+    const start = new Date(stockholmEnd.getTime() - (durationHours * 60 * 60 * 1000));
     
-    const totalDuration = end - start;
+    const totalDuration = stockholmEnd - start;
     const elapsed = stockholmNow - start;
     
     return Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
