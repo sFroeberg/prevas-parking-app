@@ -79,6 +79,26 @@ async function loadUpcomingBookings() {
     }
 }
 
+// Delete upcoming booking
+async function deleteUpcomingBooking(bookingId) {
+    try {
+        const response = await fetch(`${API_BASE}/api/upcoming/${bookingId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            await loadUpcomingBookings(); // Refresh the list
+            return true;
+        } else {
+            console.error('Failed to delete upcoming booking');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error deleting upcoming booking:', error);
+        return false;
+    }
+}
+
 // Update a parking spot via API
 async function updateParkingSpot(spotId, isOccupied, occupiedBy, durationHours = null, startTime = null, bookingDate = null) {
     try {
@@ -417,7 +437,7 @@ function renderUpcomingBookings() {
         }
         
         return `
-            <div class="history-item">
+            <div class="history-item upcoming-item">
                 <div>
                     <div class="history-user">${entry.occupiedBy}</div>
                     <div class="history-details">
@@ -426,10 +446,25 @@ function renderUpcomingBookings() {
                         (${entry.durationHours}h)
                     </div>
                 </div>
-                <div class="history-date">${dateLabel}</div>
+                <div class="upcoming-actions">
+                    <div class="history-date">${dateLabel}</div>
+                    <button class="remove-booking-btn" onclick="handleRemoveBooking('${entry.id}')" title="Remove booking">
+                        ✕
+                    </button>
+                </div>
             </div>
         `;
     }).join('');
+}
+
+// Handle remove booking button click
+async function handleRemoveBooking(bookingId) {
+    if (confirm('Are you sure you want to remove this upcoming booking?')) {
+        const success = await deleteUpcomingBooking(bookingId);
+        if (!success) {
+            alert('Failed to remove booking. Please try again.');
+        }
+    }
 }
 
 // Initialize the app when the DOM is fully loaded

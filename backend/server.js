@@ -65,6 +65,19 @@ app.get('/api/upcoming', (req, res) => {
     res.json(upcomingBookings);
 });
 
+// Delete upcoming booking
+app.delete('/api/upcoming/:id', (req, res) => {
+    const { id } = req.params;
+    const bookingIndex = upcomingBookings.findIndex(booking => booking.id === id);
+    
+    if (bookingIndex === -1) {
+        return res.status(404).json({ error: 'Upcoming booking not found' });
+    }
+    
+    upcomingBookings.splice(bookingIndex, 1);
+    res.json({ message: 'Upcoming booking deleted successfully' });
+});
+
 // Update parking spot status
 app.put('/api/spots/:id', (req, res) => {
     const { id } = req.params;

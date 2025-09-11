@@ -273,6 +273,41 @@ button:hover {
     padding: 20px;
 }
 
+/* Upcoming booking styles */
+.upcoming-item {
+    position: relative;
+}
+
+.upcoming-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.remove-booking-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.remove-booking-btn:hover {
+    background-color: #c0392b;
+    transform: scale(1.1);
+}
+
+.remove-booking-btn:active {
+    transform: scale(0.95);
+}
+
 /* Modal Styles */
 .modal {
     display: none;
