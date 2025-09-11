@@ -93,15 +93,13 @@ app.put('/api/spots/:id', (req, res) => {
     let bookingStartTime;
     
     if (startTime) {
-        // Handle local timezone properly
-        bookingStartTime = new Date(startTime);
-        // If it's a same-day booking with custom time, ensure it's in local timezone
-        if (bookingDate && bookingDate === now.toISOString().split('T')[0]) {
-            const [date, time] = startTime.split('T');
-            const [hours, minutes] = time.split(':');
-            bookingStartTime = new Date();
-            bookingStartTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-        }
+        // Parse the time string properly for local timezone
+        const [date, time] = startTime.split('T');
+        const [hours, minutes] = time.split(':');
+        
+        // Create date object in local timezone
+        bookingStartTime = new Date(date);
+        bookingStartTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
     } else {
         bookingStartTime = now;
     }
