@@ -404,15 +404,15 @@ function renderBookingHistory() {
         const endDate = new Date(entry.endTime);
         const stockholmToday = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
         const isToday = entry.bookingDate === stockholmToday;
-        const dateLabel = isToday ? 'Today' : startDate.toLocaleDateString();
+        const dateLabel = isToday ? 'Today' : startDate.toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
         
         return `
             <div class="history-item">
                 <div>
                     <div class="history-user">${entry.occupiedBy}</div>
                     <div class="history-details">
-                        ${startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
-                        ${endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
+                        ${startDate.toLocaleTimeString('sv-SE', {timeZone: 'Europe/Stockholm', hour: '2-digit', minute:'2-digit'})} - 
+                        ${endDate.toLocaleTimeString('sv-SE', {timeZone: 'Europe/Stockholm', hour: '2-digit', minute:'2-digit'})} 
                         (${entry.durationHours}h)
                     </div>
                 </div>
@@ -444,7 +444,7 @@ function renderUpcomingBookings() {
         if (entry.bookingDate === tomorrowString) {
             dateLabel = 'Tomorrow';
         } else {
-            dateLabel = startDate.toLocaleDateString();
+            dateLabel = startDate.toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
         }
         
         return `
@@ -452,8 +452,8 @@ function renderUpcomingBookings() {
                 <div>
                     <div class="history-user">${entry.occupiedBy}</div>
                     <div class="history-details">
-                        ${startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
-                        ${endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
+                        ${startDate.toLocaleTimeString('sv-SE', {timeZone: 'Europe/Stockholm', hour: '2-digit', minute:'2-digit'})} - 
+                        ${endDate.toLocaleTimeString('sv-SE', {timeZone: 'Europe/Stockholm', hour: '2-digit', minute:'2-digit'})} 
                         (${entry.durationHours}h)
                     </div>
                 </div>

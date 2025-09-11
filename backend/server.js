@@ -39,7 +39,7 @@ function initializeParkingSpots() {
         number: i + 1,
         isOccupied: false,
         occupiedBy: null,
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: new Date().toLocaleString("en-US", {timeZone: "Europe/Stockholm"}),
         endTime: null,
         durationHours: null,
         startTime: null,
@@ -121,11 +121,11 @@ app.put('/api/spots/:id', (req, res) => {
                 id: uuidv4(),
                 spotNumber: parkingSpots[spotIndex].number,
                 occupiedBy,
-                startTime: bookingStartTime.toISOString(),
+                startTime: bookingStartTime.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}),
                 endTime,
                 durationHours,
                 bookingDate: selectedDate,
-                timestamp: now.toISOString()
+                timestamp: now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"})
             };
             
             upcomingBookings.unshift(upcomingEntry);
@@ -142,11 +142,11 @@ app.put('/api/spots/:id', (req, res) => {
                 id: uuidv4(),
                 spotNumber: parkingSpots[spotIndex].number,
                 occupiedBy,
-                startTime: bookingStartTime.toISOString(),
+                startTime: bookingStartTime.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}),
                 endTime,
                 durationHours,
                 bookingDate: selectedDate,
-                timestamp: now.toISOString()
+                timestamp: now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"})
             };
             
             bookingHistory.unshift(historyEntry);
@@ -162,10 +162,10 @@ app.put('/api/spots/:id', (req, res) => {
             ...parkingSpots[spotIndex],
             isOccupied,
             occupiedBy: isOccupied ? occupiedBy : null,
-            lastUpdated: now.toISOString(),
+            lastUpdated: now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}),
             endTime,
             durationHours: isOccupied ? durationHours : null,
-            startTime: isOccupied ? bookingStartTime.toISOString() : null,
+            startTime: isOccupied ? bookingStartTime.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}) : null,
             bookingDate: isOccupied ? selectedDate : null
         };
     }
@@ -195,7 +195,7 @@ function checkExpiredSpots() {
             spot.occupiedBy = null;
             spot.endTime = null;
             spot.durationHours = null;
-            spot.lastUpdated = now.toISOString();
+            spot.lastUpdated = now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"});
             spotsChanged = true;
             
             // Emit real-time update for expired spot
