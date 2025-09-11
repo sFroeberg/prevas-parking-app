@@ -181,8 +181,8 @@ function showUpdateModal(spot) {
     spotNumberSpan.textContent = spot.number;
     occupantNameInput.value = '';
     
-    // Set dropdown based on current status - opposite of what it currently is for easier booking/unbooking
-    spotStatusSelect.value = spot.isOccupied ? 'available' : 'occupied';
+    // Always allow booking regardless of current status - user can choose
+    spotStatusSelect.value = 'occupied';
     
     if (spot.isOccupied) {
         occupantNameInput.value = spot.occupiedBy || '';
@@ -262,10 +262,10 @@ function setupEventListeners() {
         }
     });
     
-    // Set default booking date to today
+    // Set default booking date to today in Stockholm timezone
     const bookingDateInput = document.getElementById('bookingDate');
     const startTimeInput = document.getElementById('startTime');
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
     bookingDateInput.value = today;
     
     // Confirm update
@@ -392,7 +392,8 @@ function renderBookingHistory() {
     historyContainer.innerHTML = bookingHistory.map(entry => {
         const startDate = new Date(entry.startTime);
         const endDate = new Date(entry.endTime);
-        const isToday = entry.bookingDate === new Date().toISOString().split('T')[0];
+        const stockholmToday = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
+        const isToday = entry.bookingDate === stockholmToday;
         const dateLabel = isToday ? 'Today' : startDate.toLocaleDateString();
         
         return `
@@ -420,10 +421,10 @@ function renderUpcomingBookings() {
         return;
     }
     
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowString = tomorrow.toISOString().split('T')[0];
+    const stockholmToday = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
+    const stockholmTomorrow = new Date();
+    stockholmTomorrow.setDate(stockholmTomorrow.getDate() + 1);
+    const tomorrowString = stockholmTomorrow.toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
     
     upcomingContainer.innerHTML = upcomingBookings.map(entry => {
         const startDate = new Date(entry.startTime);

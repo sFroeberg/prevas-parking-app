@@ -89,17 +89,18 @@ app.put('/api/spots/:id', (req, res) => {
         return res.status(404).json({ error: 'Parking spot not found' });
     }
     
+    // Get current time in Stockholm timezone (Europe/Stockholm)
     const now = new Date();
     let bookingStartTime;
     
     if (startTime) {
-        // Parse the time string properly for local timezone
+        // Parse the time string for Stockholm timezone
         const [date, time] = startTime.split('T');
         const [hours, minutes] = time.split(':');
+        const [year, month, day] = date.split('-');
         
-        // Create date object in local timezone
-        bookingStartTime = new Date(date);
-        bookingStartTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        // Create date object as Stockholm local time
+        bookingStartTime = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), 0, 0);
     } else {
         bookingStartTime = now;
     }
@@ -107,7 +108,9 @@ app.put('/api/spots/:id', (req, res) => {
     const endTime = isOccupied && durationHours ? 
         new Date(bookingStartTime.getTime() + (durationHours * 60 * 60 * 1000)).toISOString() : null;
     
-    const today = now.toISOString().split('T')[0];
+    // Get today's date in Stockholm timezone
+    const stockholmToday = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
+    const today = stockholmToday;
     const selectedDate = bookingDate || today;
     const isFutureBooking = selectedDate > today;
     
