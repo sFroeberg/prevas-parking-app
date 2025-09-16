@@ -400,16 +400,8 @@ function renderBookingHistory() {
     }
     
     historyContainer.innerHTML = bookingHistory.map(entry => {
-        // Parse start and end times as local Stockholm time
-        let startDate, endDate;
-        
-        if (entry.startTime.includes('T')) {
-            const startParts = entry.startTime.replace('T', ' ').split(/[- :]/);
-            startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], startParts[3], startParts[4]);
-        } else {
-            // Handle different date format from backend
-            startDate = new Date(entry.startTime);
-        }
+        // Parse end time as local Stockholm time
+        let endDate;
         
         if (entry.endTime.includes('T')) {
             const endParts = entry.endTime.replace('T', ' ').split(/[- :]/);
@@ -418,6 +410,9 @@ function renderBookingHistory() {
             // Handle different date format from backend
             endDate = new Date(entry.endTime);
         }
+        
+        // Calculate start time by subtracting duration from end time
+        const startDate = new Date(endDate.getTime() - (entry.durationHours * 60 * 60 * 1000));
         
         const stockholmToday = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
         const isToday = entry.bookingDate === stockholmToday;
@@ -454,16 +449,8 @@ function renderUpcomingBookings() {
     const tomorrowString = stockholmTomorrow.toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
     
     upcomingContainer.innerHTML = upcomingBookings.map(entry => {
-        // Parse start and end times as local Stockholm time
-        let startDate, endDate;
-        
-        if (entry.startTime.includes('T')) {
-            const startParts = entry.startTime.replace('T', ' ').split(/[- :]/);
-            startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], startParts[3], startParts[4]);
-        } else {
-            // Handle different date format from backend
-            startDate = new Date(entry.startTime);
-        }
+        // Parse end time as local Stockholm time
+        let endDate;
         
         if (entry.endTime.includes('T')) {
             const endParts = entry.endTime.replace('T', ' ').split(/[- :]/);
@@ -472,6 +459,9 @@ function renderUpcomingBookings() {
             // Handle different date format from backend
             endDate = new Date(entry.endTime);
         }
+        
+        // Calculate start time by subtracting duration from end time
+        const startDate = new Date(endDate.getTime() - (entry.durationHours * 60 * 60 * 1000));
         
         let dateLabel;
         if (entry.bookingDate === tomorrowString) {
