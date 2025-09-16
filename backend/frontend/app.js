@@ -283,6 +283,16 @@ function setupEventListeners() {
             return;
         }
         
+        // Check for booking overlaps if this is a future booking
+        if (isOccupied && bookingDate && startTime) {
+            const endTime = new Date(new Date(startTime).getTime() + (durationHours * 60 * 60 * 1000));
+            
+            if (checkBookingOverlap(startTime, endTime, bookingDate)) {
+                alert('This time slot overlaps with an existing booking. Please choose a different time.');
+                return;
+            }
+        }
+        
         const success = await updateParkingSpot(
             selectedSpot.id,
             isOccupied,
@@ -491,13 +501,45 @@ function renderUpcomingBookings() {
     }).join('');
 }
 
+// Check if a booking overlaps with existing upcoming bookings
+function checkBookingOverlap(newStartTime, newEndTime, newBookingDate) {
+    return upcomingBookings.some(booking => {
+        // Skip if different dates
+        if (booking.bookingDate !== newBookingDate) {
+            return false;
+        }
+        
+        // Parse existing booking times
+        let existingEndDate;
+        if (booking.endTime.includes('T')) {
+            const endParts = booking.endTime.replace('T', ' ').split(/[- :]/);
+            existingEndDate = new Date(endParts[0], endParts[1] - 1, endParts[2], endParts[3], endParts[4]);
+        } else {
+            existingEndDate = new Date(booking.endTime);
+        }
+        
+        const existingStartDate = new Date(existingEndDate.getTime() - (booking.durationHours * 60 * 60 * 1000));
+        
+        // Convert new booking times to Date objects for comparison
+        const newStart = new Date(newStartTime);
+        const newEnd = new Date(newEndTime);
+        
+        // Check for overlap: new booking starts before existing ends AND new booking ends after existing starts
+        return (newStart < existingEndDate && newEnd > existingStartDate);
+    });
+}
+
 // Handle remove booking button click
 async function handleRemoveBooking(bookingId) {
     if (confirm('Are you sure you want to remove this upcoming booking?')) {
         const success = await deleteUpcomingBooking(bookingId);
         if (!success) {
             alert('Failed to remove booking. Please try again.');
+            return;
         }
+        
+        await loadUpcomingBookings();
+        await loadBookingHistory();
     }
 }
 
