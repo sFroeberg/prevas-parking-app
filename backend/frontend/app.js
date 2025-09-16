@@ -401,23 +401,35 @@ function renderBookingHistory() {
     
     historyContainer.innerHTML = bookingHistory.map(entry => {
         // Parse start and end times as local Stockholm time
-        const startParts = entry.startTime.replace('T', ' ').split(/[- :]/);
-        const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], startParts[3], startParts[4]);
+        let startDate, endDate;
         
-        const endParts = entry.endTime.replace('T', ' ').split(/[- :]/);
-        const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2], endParts[3], endParts[4]);
+        if (entry.startTime.includes('T')) {
+            const startParts = entry.startTime.replace('T', ' ').split(/[- :]/);
+            startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], startParts[3], startParts[4]);
+        } else {
+            // Handle different date format from backend
+            startDate = new Date(entry.startTime);
+        }
+        
+        if (entry.endTime.includes('T')) {
+            const endParts = entry.endTime.replace('T', ' ').split(/[- :]/);
+            endDate = new Date(endParts[0], endParts[1] - 1, endParts[2], endParts[3], endParts[4]);
+        } else {
+            // Handle different date format from backend
+            endDate = new Date(entry.endTime);
+        }
         
         const stockholmToday = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
         const isToday = entry.bookingDate === stockholmToday;
-        const dateLabel = isToday ? 'Today' : startDate.toLocaleDateString('sv-SE');
+        const dateLabel = isToday ? 'Today' : (startDate.toLocaleDateString ? startDate.toLocaleDateString('sv-SE') : entry.bookingDate);
         
         return `
             <div class="history-item">
                 <div>
                     <div class="history-user">${entry.occupiedBy}</div>
                     <div class="history-details">
-                        ${startDate.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'})} - 
-                        ${endDate.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'})} 
+                        ${startDate.toLocaleTimeString ? startDate.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : 'N/A'} - 
+                        ${endDate.toLocaleTimeString ? endDate.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : 'N/A'} 
                         (${entry.durationHours}h)
                     </div>
                 </div>
@@ -443,17 +455,29 @@ function renderUpcomingBookings() {
     
     upcomingContainer.innerHTML = upcomingBookings.map(entry => {
         // Parse start and end times as local Stockholm time
-        const startParts = entry.startTime.replace('T', ' ').split(/[- :]/);
-        const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], startParts[3], startParts[4]);
+        let startDate, endDate;
         
-        const endParts = entry.endTime.replace('T', ' ').split(/[- :]/);
-        const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2], endParts[3], endParts[4]);
+        if (entry.startTime.includes('T')) {
+            const startParts = entry.startTime.replace('T', ' ').split(/[- :]/);
+            startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], startParts[3], startParts[4]);
+        } else {
+            // Handle different date format from backend
+            startDate = new Date(entry.startTime);
+        }
+        
+        if (entry.endTime.includes('T')) {
+            const endParts = entry.endTime.replace('T', ' ').split(/[- :]/);
+            endDate = new Date(endParts[0], endParts[1] - 1, endParts[2], endParts[3], endParts[4]);
+        } else {
+            // Handle different date format from backend
+            endDate = new Date(entry.endTime);
+        }
         
         let dateLabel;
         if (entry.bookingDate === tomorrowString) {
             dateLabel = 'Tomorrow';
         } else {
-            dateLabel = startDate.toLocaleDateString('sv-SE');
+            dateLabel = startDate.toLocaleDateString ? startDate.toLocaleDateString('sv-SE') : entry.bookingDate;
         }
         
         return `
@@ -461,8 +485,8 @@ function renderUpcomingBookings() {
                 <div>
                     <div class="history-user">${entry.occupiedBy}</div>
                     <div class="history-details">
-                        ${startDate.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'})} - 
-                        ${endDate.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'})} 
+                        ${startDate.toLocaleTimeString ? startDate.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : 'N/A'} - 
+                        ${endDate.toLocaleTimeString ? endDate.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : 'N/A'} 
                         (${entry.durationHours}h)
                     </div>
                 </div>
