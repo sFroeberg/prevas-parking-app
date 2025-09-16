@@ -337,10 +337,10 @@ function getTimeRemaining(endTime) {
     const now = new Date();
     const stockholmNow = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
     
-    // Parse end time and ensure it's treated as Stockholm time
-    const end = new Date(endTime);
-    const stockholmEnd = new Date(end.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
-    const diff = stockholmEnd - stockholmNow;
+    // Parse endTime and treat it as local Stockholm time
+    const endParts = endTime.replace('T', ' ').split(/[- :]/);
+    const endStockholm = new Date(endParts[0], endParts[1] - 1, endParts[2], endParts[3], endParts[4]);
+    const diff = endStockholm - stockholmNow;
     
     if (diff <= 0) return 'Expired';
     
@@ -359,12 +359,12 @@ function getProgressPercentage(endTime, durationHours) {
     const now = new Date();
     const stockholmNow = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
     
-    // Parse end time and ensure it's treated as Stockholm time
-    const end = new Date(endTime);
-    const stockholmEnd = new Date(end.toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
-    const start = new Date(stockholmEnd.getTime() - (durationHours * 60 * 60 * 1000));
+    // Parse endTime and treat it as local Stockholm time
+    const endParts = endTime.replace('T', ' ').split(/[- :]/);
+    const endStockholm = new Date(endParts[0], endParts[1] - 1, endParts[2], endParts[3], endParts[4]);
+    const start = new Date(endStockholm.getTime() - (durationHours * 60 * 60 * 1000));
     
-    const totalDuration = stockholmEnd - start;
+    const totalDuration = endStockholm - start;
     const elapsed = stockholmNow - start;
     
     return Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
