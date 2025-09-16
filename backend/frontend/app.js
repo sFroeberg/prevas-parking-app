@@ -400,11 +400,11 @@ function renderBookingHistory() {
     }
     
     historyContainer.innerHTML = bookingHistory.map(entry => {
-        const startDate = new Date(entry.startTime).toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
-        const endDate = new Date(entry.endTime).toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
+        const startDate = new Date(entry.startTime);
+        const endDate = new Date(entry.endTime);
         const stockholmToday = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
         const isToday = entry.bookingDate === stockholmToday;
-        const dateLabel = isToday ? 'Today' : startDate;
+        const dateLabel = isToday ? 'Today' : startDate.toLocaleDateString('sv-SE', {timeZone: 'Europe/Stockholm'});
         
         return `
             <div class="history-item">
